@@ -7,6 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 @ExperimentalCoroutinesApi
 class CountDownViewModel: ViewModel() {
@@ -16,15 +17,21 @@ class CountDownViewModel: ViewModel() {
     private val _timerState = MutableStateFlow(TimerState.RESET)
     val timerState = _timerState.asStateFlow()
 
-    private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SSS")
+    private val _startTimeMillis = MutableStateFlow(10_000L) // 1 minute 30 seconds
+
+    private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
     val timerText = _elapsedTime
         .map { millis ->
-            LocalTime.ofNanoOfDay(millis * 1_000_000).format(formatter)
+                val timeLeft = _startTimeMillis.value - millis
+                val minusSign = if (timeLeft < 0) "-" else ""
+                val time = LocalTime.ofNanoOfDay(abs(timeLeft) * 1_000_000)
+                    .format(formatter)
+                minusSign.plus(time)
         }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            "00:00:00:000"
+            "00:00:10"
         )
 
     init {
