@@ -12,8 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +33,7 @@ class MainActivity : ComponentActivity() {
             val viewModel = viewModel<CountDownViewModel>()
             val timerState by viewModel.timerState.collectAsStateWithLifecycle()
             val timerText by viewModel.timerText.collectAsStateWithLifecycle()
+            val runningOver by viewModel.runningOver.collectAsStateWithLifecycle()
 
             Scaffold(
                 timeText = {
@@ -43,6 +47,7 @@ class MainActivity : ComponentActivity() {
                 CountDown(
                     state = timerState,
                     text = timerText,
+                    runningOver = runningOver,
                     onToggleRunning = viewModel::toggleIsRunning,
                     onReset = viewModel::resetTimer,
                     modifier = Modifier.fillMaxSize()
@@ -52,12 +57,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Preview
 @Composable
 private fun CountDown(
-    state: TimerState,
-    text: String,
-    onToggleRunning: () -> Unit,
-    onReset: () -> Unit,
+    state: TimerState = TimerState.PAUSED,
+    text: String = "00:01:15",
+    runningOver: Boolean = true,
+    onToggleRunning: () -> Unit = {},
+    onReset: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -69,7 +76,8 @@ private fun CountDown(
             text = text,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = if (runningOver) Color.Red else Color.Unspecified
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(

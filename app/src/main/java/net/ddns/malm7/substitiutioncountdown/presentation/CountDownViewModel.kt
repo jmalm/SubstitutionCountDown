@@ -13,6 +13,15 @@ import kotlin.math.abs
 class CountDownViewModel: ViewModel() {
 
     private val _elapsedTime = MutableStateFlow(0L)
+    val runningOver = _elapsedTime
+        .map { millis ->
+            millis > _startTimeMillis.value
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
 
     private val _timerState = MutableStateFlow(TimerState.RESET)
     val timerState = _timerState.asStateFlow()
