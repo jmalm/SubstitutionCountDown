@@ -1,10 +1,10 @@
-package com.metehanbolat.stopwatchwearos.presentation.theme
+package net.ddns.malm7.substitiutioncountdown.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme
 
 @Composable
-fun StopWatchWearOsTheme(
+fun SubstitutionCountDownTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

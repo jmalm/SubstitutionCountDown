@@ -1,4 +1,4 @@
-package com.metehanbolat.stopwatchwearos.presentation
+package net.ddns.malm7.substitiutioncountdown.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +9,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @ExperimentalCoroutinesApi
-class StopWatchViewModel: ViewModel() {
+class CountDownViewModel: ViewModel() {
 
     private val _elapsedTime = MutableStateFlow(0L)
 
@@ -17,7 +17,7 @@ class StopWatchViewModel: ViewModel() {
     val timerState = _timerState.asStateFlow()
 
     private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss:SSS")
-    val stopWatchText = _elapsedTime
+    val timerText = _elapsedTime
         .map { millis ->
             LocalTime.ofNanoOfDay(millis * 1_000_000).format(formatter)
         }

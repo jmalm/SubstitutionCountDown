@@ -1,4 +1,4 @@
-package com.metehanbolat.stopwatchwearos.presentation
+package net.ddns.malm7.substitiutioncountdown.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -27,9 +27,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel = viewModel<StopWatchViewModel>()
+            val viewModel = viewModel<CountDownViewModel>()
             val timerState by viewModel.timerState.collectAsStateWithLifecycle()
-            val stopWatchText by viewModel.stopWatchText.collectAsStateWithLifecycle()
+            val timerText by viewModel.timerText.collectAsStateWithLifecycle()
 
             Scaffold(
                 timeText = {
@@ -40,9 +40,9 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             ) {
-                StopWatch(
+                CountDown(
                     state = timerState,
-                    text = stopWatchText,
+                    text = timerText,
                     onToggleRunning = viewModel::toggleIsRunning,
                     onReset = viewModel::resetTimer,
                     modifier = Modifier.fillMaxSize()
@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun StopWatch(
+private fun CountDown(
     state: TimerState,
     text: String,
     onToggleRunning: () -> Unit,

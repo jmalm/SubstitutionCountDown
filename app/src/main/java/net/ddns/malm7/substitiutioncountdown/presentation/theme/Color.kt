@@ -1,4 +1,4 @@
-package com.metehanbolat.stopwatchwearos.presentation.theme
+package net.ddns.malm7.substitiutioncountdown.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.Colors

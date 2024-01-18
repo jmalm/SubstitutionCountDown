@@ -1,4 +1,4 @@
-package com.metehanbolat.stopwatchwearos.presentation.theme
+package net.ddns.malm7.substitiutioncountdown.presentation.theme
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.metehanbolat.stopwatchwearos'
+    namespace 'net.ddns.malm7.substitutioncountdown'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.metehanbolat.stopwatchwearos"
+        applicationId "net.ddns.malm7.substitutioncountdown"
         minSdk 30
         targetSdk 33
         versionCode 1
