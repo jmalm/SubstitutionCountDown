@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import kotlin.math.abs
+import kotlin.math.floor
 
 @ExperimentalCoroutinesApi
 class CountDownViewModel: ViewModel() {
@@ -23,24 +22,29 @@ class CountDownViewModel: ViewModel() {
             false
         )
 
+    private val _lastElapsedTime = MutableStateFlow(0L)
+    val lastTimerText = _lastElapsedTime
+        .map { millis -> if (millis > 0) millisToStr(millis) else "" }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ""
+        )
+
     private val _timerState = MutableStateFlow(TimerState.RESET)
     val timerState = _timerState.asStateFlow()
 
-    private val _startTimeMillis = MutableStateFlow(10_000L) // 1 minute 30 seconds
+    private val _startTimeMillis = MutableStateFlow(3_000L) // 3 seconds, for quick testing
 
-    private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
     val timerText = _elapsedTime
         .map { millis ->
-                val timeLeft = _startTimeMillis.value - millis
-                val minusSign = if (timeLeft < 0) "-" else ""
-                val time = LocalTime.ofNanoOfDay(abs(timeLeft) * 1_000_000)
-                    .format(formatter)
-                minusSign.plus(time)
+                val millisLeft = _startTimeMillis.value - millis
+            millisToStr(millisLeft + 999L) // Show the second we're on.
         }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            "00:00:10"
+            "3"
         )
 
     init {
@@ -64,9 +68,10 @@ class CountDownViewModel: ViewModel() {
         }
     }
 
-    fun resetTimer() {
-        _timerState.update { TimerState.RESET }
+    fun restartTimer() {
+        _lastElapsedTime.update { _elapsedTime.value }
         _elapsedTime.update { 0L }
+        if (timerState.value == TimerState.PAUSED) _timerState.update { TimerState.RESET }
     }
 
     private fun getTimerFlow(isRunning: Boolean): Flow<Long> {
@@ -81,6 +86,22 @@ class CountDownViewModel: ViewModel() {
                 startMillis = System.currentTimeMillis()
                 delay(10L)
             }
+        }
+    }
+
+    companion object {
+        fun millisToStr(millis: Long): String {
+            val totalSecondsLeftCeil = floor(millis / 1000F)
+            val hoursLeft = abs(totalSecondsLeftCeil / (60 * 60)).toInt()
+            val minutesLeft = ((abs(totalSecondsLeftCeil) - hoursLeft * 60 * 60) / 60).toInt()
+            val secondsLeft = (abs(totalSecondsLeftCeil) - hoursLeft * 60 * 60 - minutesLeft * 60).toInt()
+            val minusSign = if (totalSecondsLeftCeil < 0) "-" else ""
+            var time = if (hoursLeft != 0) "$hoursLeft:" else ""
+            time += if (hoursLeft != 0 || minutesLeft != 0) minutesLeft.toString()
+                .padStart(if (time.isNotEmpty()) 2 else 0, '0') + ":" else ""
+            time += secondsLeft.toString().padStart(if (time.isNotEmpty()) 2 else 0, '0')
+
+            return minusSign.plus(time)
         }
     }
 }

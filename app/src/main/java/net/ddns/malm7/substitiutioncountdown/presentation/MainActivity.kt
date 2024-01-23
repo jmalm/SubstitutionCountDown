@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +32,7 @@ class MainActivity : ComponentActivity() {
             val viewModel = viewModel<CountDownViewModel>()
             val timerState by viewModel.timerState.collectAsStateWithLifecycle()
             val timerText by viewModel.timerText.collectAsStateWithLifecycle()
+            val lastTimerText by viewModel.lastTimerText.collectAsStateWithLifecycle()
             val runningOver by viewModel.runningOver.collectAsStateWithLifecycle()
 
             Scaffold(
@@ -45,12 +45,13 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 CountDown(
+                    modifier = Modifier.fillMaxSize(),
                     state = timerState,
-                    text = timerText,
+                    timerText = timerText,
+                    lastTimerText = lastTimerText,
                     runningOver = runningOver,
                     onToggleRunning = viewModel::toggleIsRunning,
-                    onReset = viewModel::resetTimer,
-                    modifier = Modifier.fillMaxSize()
+                    onRestart = viewModel::restartTimer,
                 )
             }
         }
@@ -60,12 +61,13 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 private fun CountDown(
+    modifier: Modifier = Modifier,
     state: TimerState = TimerState.PAUSED,
-    text: String = "00:01:15",
+    timerText: String = "1:15",
+    lastTimerText: String = "33",
     runningOver: Boolean = true,
     onToggleRunning: () -> Unit = {},
-    onReset: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onRestart: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -73,8 +75,8 @@ private fun CountDown(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = text,
-            fontSize = 20.sp,
+            text = timerText,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = if (runningOver) Color.Red else Color.Unspecified
@@ -94,17 +96,22 @@ private fun CountDown(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
-                onClick = onReset,
-                enabled = state != TimerState.RESET,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.surface
-                )
+                onClick = onRestart,
+                enabled = state != TimerState.RESET
             ) {
                 Icon(
-                    imageVector = Icons.Default.Stop,
+                    imageVector = Icons.Default.RestartAlt,
                     contentDescription = null
                 )
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = lastTimerText,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.Gray
+        )
     }
 }
