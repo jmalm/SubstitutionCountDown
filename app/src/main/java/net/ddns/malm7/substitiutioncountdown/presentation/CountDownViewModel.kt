@@ -9,7 +9,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 
 @ExperimentalCoroutinesApi
-class CountDownViewModel: ViewModel() {
+class CountDownViewModel : ViewModel() {
 
     private val _elapsedTime = MutableStateFlow(0L)
     val runningOver = _elapsedTime
@@ -36,11 +36,10 @@ class CountDownViewModel: ViewModel() {
 
     private val _startTimeMillis = MutableStateFlow(3_000L) // 3 seconds, for quick testing
 
-    val timerText = _elapsedTime
-        .map { millis ->
-                val millisLeft = _startTimeMillis.value - millis
-            millisToStr(millisLeft + 999L) // Show the second we're on.
-        }
+    val timerText = combine(_elapsedTime, _startTimeMillis) { elapsedTime, startTimeMillis ->
+        val millisLeft = startTimeMillis - elapsedTime
+        millisToStr(millisLeft + 999L) // Show the second we're on.
+    }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -61,7 +60,7 @@ class CountDownViewModel: ViewModel() {
     }
 
     fun toggleIsRunning() {
-        when(timerState.value) {
+        when (timerState.value) {
             TimerState.RUNNING -> _timerState.update { TimerState.PAUSED }
             TimerState.PAUSED,
             TimerState.RESET -> _timerState.update { TimerState.RUNNING }
@@ -72,6 +71,24 @@ class CountDownViewModel: ViewModel() {
         _lastElapsedTime.update { _elapsedTime.value }
         _elapsedTime.update { 0L }
         if (timerState.value == TimerState.PAUSED) _timerState.update { TimerState.RESET }
+    }
+
+    fun handleScroll(delta: Float) {
+        // Return if state is not RESET
+        if (timerState.value != TimerState.RESET) return
+
+        // TODO: Make this dependent on _startTimeMillis
+        // As _startTimeMillis increases, we want to take larger strides.
+        // And only use 5 s, 10 s, 30 s, and so on, intervals.
+        val deltaToMillisFactor = 10
+        val millis = (delta * deltaToMillisFactor).toLong()
+
+        // Make sure we don't go below 0.
+        var newMillis = _startTimeMillis.value + millis
+        if (newMillis < 0) newMillis = 0
+
+        // Update start time.
+        _startTimeMillis.update { newMillis }
     }
 
     private fun getTimerFlow(isRunning: Boolean): Flow<Long> {
