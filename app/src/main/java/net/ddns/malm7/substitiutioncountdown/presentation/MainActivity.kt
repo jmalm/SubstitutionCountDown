@@ -1,8 +1,10 @@
 package net.ddns.malm7.substitiutioncountdown.presentation
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -33,11 +35,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalWearFoundationApi::class)
 @ExperimentalCoroutinesApi
 class MainActivity : ComponentActivity() {
+    private val viewModel: CountDownViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel = viewModel<CountDownViewModel>()
             val timerState by viewModel.timerState.collectAsStateWithLifecycle()
             val timerText by viewModel.timerText.collectAsStateWithLifecycle()
             val lastTimerText by viewModel.lastTimerText.collectAsStateWithLifecycle()
@@ -75,6 +77,34 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_STEM_1) {
+            event?.startTracking()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_STEM_1) {
+            this.viewModel.restartTimer()
+            return true
+        }
+        return super.onKeyLongPress(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event != null) {
+            if ((event.flags and KeyEvent.FLAG_CANCELED_LONG_PRESS) == 0) {
+                if (keyCode == KeyEvent.KEYCODE_STEM_1) {
+                    this.viewModel.toggleIsRunning()
+                    return true
+                }
+            }
+        }
+        return super.onKeyUp(keyCode, event)
     }
 }
 
