@@ -1,6 +1,9 @@
 package net.ddns.malm7.substitiutioncountdown.presentation
 
+import android.content.Context
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,24 +16,22 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
 import androidx.wear.compose.foundation.rememberActiveFocusRequester
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalWearFoundationApi::class)
 @ExperimentalCoroutinesApi
@@ -45,6 +46,21 @@ class MainActivity : ComponentActivity() {
             val lastTimerText by viewModel.lastTimerText.collectAsStateWithLifecycle()
             val runningOver by viewModel.runningOver.collectAsStateWithLifecycle()
 
+            // Vibrate when running over.
+            // TODO: I'm not sure this is the place to do this...
+            // TODO: Should we pause vibration when not running? How? We can only cancel.
+            // TODO: How to run vibration when the app is in the background?
+            val vibrator = LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (runningOver && vibrator.hasVibrator()) {
+                val vibrationEffect = VibrationEffect.createWaveform(
+                    longArrayOf(700L, 300L, 50L, 950L, 50L, 950L, 50L, 950L, 50L, 950L, 140L, 860L),
+                    intArrayOf(  255,    0,  90,    0,  90,    0,  90,    0,  90,    0,   50,    0),
+                    2)
+                vibrator.vibrate(vibrationEffect)
+            } else {
+                vibrator.cancel()
+            }
+
             Scaffold(
                 timeText = {
                     TimeText(
@@ -55,15 +71,12 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 val focusRequester = rememberActiveFocusRequester()
-                val coroutineScope = rememberCoroutineScope()
 
                 CountDown(
                     modifier = Modifier
                         .fillMaxSize()
                         .onRotaryScrollEvent {
-                            coroutineScope.launch {
-                                viewModel.handleScroll(it.verticalScrollPixels)
-                            }
+                            viewModel.handleScroll(it.verticalScrollPixels)
                             true
                         }
                         .focusRequester(focusRequester)
