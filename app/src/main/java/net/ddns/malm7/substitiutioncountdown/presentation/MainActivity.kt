@@ -96,7 +96,7 @@ private fun CountDown(
     ) {
         Text(
             text = timerText,
-            fontSize = 32.sp,
+            fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = if (runningOver) Color.Red else Color.Unspecified
@@ -128,7 +128,7 @@ private fun CountDown(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = lastTimerText,
-            fontSize = 14.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = Color.Gray
